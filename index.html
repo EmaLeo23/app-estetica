@@ -8,115 +8,59 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: #f8f9fa; 
-            margin: 0; 
-            padding: 12px;
-            color: #333;
+            background-color: #f8f9fa; margin: 0; padding: 12px; color: #333;
         }
         .app-card { 
-            background: white; 
-            max-width: 480px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            border-radius: 18px; 
+            background: white; max-width: 480px; margin: 0 auto; padding: 20px; border-radius: 18px; 
             box-shadow: 0 8px 24px rgba(0,0,0,0.08); 
         }
         .logo-container { text-align: center; margin-bottom: 15px; }
         .logo-img { max-width: 120px; height: auto; border-radius: 12px; }
         
-        /* Tasti di Navigazione Tab per Mobile */
-        .tab-buttons {
-            display: flex;
-            background: #f1f3f5;
-            padding: 4px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
+        .tab-buttons { display: flex; background: #f1f3f5; padding: 4px; border-radius: 12px; margin-bottom: 20px; }
         .tab-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            background: transparent;
-            font-size: 14px;
-            font-weight: 600;
-            color: #6c757d;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            flex: 1; padding: 10px; border: none; background: transparent; font-size: 14px; font-weight: 600;
+            color: #6c757d; border-radius: 10px; cursor: pointer; transition: all 0.2s ease;
         }
-        .tab-btn.active {
-            background: white;
-            color: #d63384;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        }
+        .tab-btn.active { background: white; color: #d63384; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
 
-        /* Form ed Elementi Input */
         .form-group { margin-bottom: 16px; }
         label { font-weight: 600; display: block; margin-bottom: 6px; font-size: 14px; color: #495057; }
         input, select { 
-            width: 100%; 
-            padding: 14px; 
-            border: 1.5px solid #dee2e6; 
-            border-radius: 10px; 
-            font-size: 16px; /* Evita lo zoom automatico su iPhone */
-            background-color: #fff;
-            appearance: none;
-            -webkit-appearance: none;
+            width: 100%; padding: 14px; border: 1.5px solid #dee2e6; border-radius: 10px; font-size: 16px; background-color: #fff;
+            appearance: none; -webkit-appearance: none;
         }
-        input:focus, select:focus {
-            border-color: #d63384;
-            outline: none;
-        }
-        select {
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22293%22%20height%3D%22293%22%3E%3Cpath%20fill%3D%22%236c757d%22%20d%3D%22M201.4%2040.4l-64%2064-64-64L45.4%2068.4l84%2084%2084-84z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 12px;
-        }
+        input:focus, select:focus { border-color: #d63384; outline: none; }
         .btn-submit { 
-            background-color: #d63384; 
-            color: white; 
-            border: none; 
-            padding: 16px; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            font-size: 16px; 
-            width: 100%; 
-            font-weight: 700; 
-            margin-top: 10px;
+            background-color: #d63384; color: white; border: none; padding: 16px; border-radius: 12px; 
+            cursor: pointer; font-size: 16px; width: 100%; font-weight: 700; margin-top: 10px;
             box-shadow: 0 4px 12px rgba(214, 51, 132, 0.25);
         }
-        .btn-submit:active { transform: scale(0.98); }
-
-        /* Lista Appuntamenti */
         ul { list-style-type: none; padding: 0; margin-top: 15px; }
-        li { 
-            background: #fff0f6; 
-            border-left: 4px solid #d63384;
-            margin-bottom: 12px; 
-            padding: 14px; 
-            border-radius: 8px; 
-            font-size: 14px;
-        }
+        li { background: #fff; border: 1px solid #e9ecef; margin-bottom: 12px; padding: 14px; border-radius: 12px; font-size: 14px; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-top: 6px; }
+        .badge-attesa { background-color: #fff3bf; color: #f59f00; }
+        .badge-confermato { background-color: #d3f9d8; color: #2b8a3e; }
+        .badge-spostato { background-color: #e7f5ff; color: #1971c2; }
+        .btn-accetta { background-color: #2b8a3e; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 8px; cursor: pointer; width: 100%; }
         .esito { margin-top: 15px; font-weight: 600; text-align: center; font-size: 14px; }
         .hidden { display: none; }
+        .row-time { display: flex; gap: 10px; }
     </style>
 </head>
 <body>
 
 <div class="app-card">
-    <!-- LOGO SALONE -->
     <div class="logo-container">
-        <img class="logo-img" src="https://scontent-fco2-1.xx.fbcdn.net/v/t39.30808-6/480468931_1189319156532944_8943714481012053854_n.jpg?stp=dst-jpg_tt6&cstp=mx1003x650&ctp=s1003x650&_nc_cat=111&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=Fs2-WrR3-dkQ7kNvwEHzcjC&_nc_oc=AdqdyOXfzHmLML8Ur_2BKaJ2MXnaniHnElnNPmnYIPvMflL7NKfefU_6iWlSFbqVPYo&_nc_zt=23&_nc_ht=scontent-fco2-1.xx&_nc_gid=TVdK4anBsl2p24uHROhXOg&_nc_ss=7b289&oh=00_AQI-8iwrNJSMIV_v-oFRdCRfyHTayEJuBV_4VkrDndz2uw&oe=6AA0784C" alt="Logo Salone">
+        <img id="logoApp" class="logo-img" src="" alt="Logo Salone">
     </div>
 
-    <!-- SELETTORE TAB -->
     <div class="tab-buttons">
         <button id="btnTabPrenota" class="tab-btn active" onclick="mostraTab('prenota')">Prenota</button>
         <button id="btnTabMiei" class="tab-btn" onclick="mostraTab('miei')">I Miei Appuntamenti</button>
     </div>
 
-    <!-- SEZIONE 1: PRENOTAZIONE -->
+    <!-- PRENOTAZIONE -->
     <div id="sezionePrenota">
         <div class="form-group">
             <label for="nome">Nome e Cognome</label>
@@ -129,6 +73,11 @@
         </div>
 
         <div class="form-group">
+            <label for="pin">Crea/Inserisci PIN a 4 cifre</label>
+            <input type="password" id="pin" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="****">
+        </div>
+
+        <div class="form-group">
             <label for="servizio">Trattamento</label>
             <select id="servizio">
                 <option value="">Caricamento servizi...</option>
@@ -136,27 +85,106 @@
         </div>
 
         <div class="form-group">
-            <label for="dataOra">Data e Ora</label>
-            <input type="datetime-local" id="dataOra">
+            <label>Seleziona Giorno e Orario</label>
+            <div class="row-time">
+                <input type="date" id="dataGiorno" onchange="aggiornaOrariPerGiornoSelezionato()">
+                <select id="oraSlot">
+                    <option value="">Scegli data prima</option>
+                </select>
+            </div>
         </div>
 
-        <button class="btn-submit" onclick="effettuaPrenotazione()">Conferma Prenotazione</button>
+        <button class="btn-submit" onclick="effettuaPrenotazione()">Invia Richiesta</button>
         <div id="esitoPrenotazione" class="esito"></div>
     </div>
 
-    <!-- SEZIONE 2: I MIEI APPUNTAMENTI -->
+    <!-- MIEI APPUNTAMENTI -->
     <div id="sezioneMiei" class="hidden">
         <div class="form-group">
             <label for="telefonoRicerca">Numero di Telefono</label>
             <input type="tel" id="telefonoRicerca" placeholder="es. +393331234567">
         </div>
-        <button class="btn-submit" onclick="cercaAppuntamenti()">Cerca Appuntamenti</button>
+        <div class="form-group">
+            <label for="pinRicerca">Inserisci il tuo PIN di 4 cifre</label>
+            <input type="password" id="pinRicerca" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="****">
+        </div>
+        <button class="btn-submit" onclick="cercaAppuntamenti()">Accedi ai Miei Appuntamenti</button>
+        
+        <button style="background:none; border:none; color:#d63384; font-weight:bold; font-size:13px; margin-top:12px; cursor:pointer; width:100%; text-decoration:underline;" onclick="recuperaPinWhatsApp()">
+            Hai dimenticato il PIN? Chiedi supporto su WhatsApp
+        </button>
 
         <ul id="listaAppuntamenti"></ul>
     </div>
 </div>
 
 <script>
+    let configGlobale = null;
+
+    function impostaDataMinimaDomani() {
+        const inputData = document.getElementById('dataGiorno');
+        const domani = new Date();
+        domani.setDate(domani.getDate() + 1);
+        
+        const yyyy = domani.getFullYear();
+        const mm = String(domani.getMonth() + 1).padStart(2, '0');
+        const dd = String(domani.getDate()).padStart(2, '0');
+        
+        inputData.min = `${yyyy}-${mm}-${dd}`;
+        inputData.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    async function caricaConfigurazioni() {
+        try {
+            const res = await fetch('/api/config');
+            configGlobale = await res.json();
+            
+            if (configGlobale.logo_url) {
+                document.getElementById('logoApp').src = configGlobale.logo_url;
+            }
+
+            aggiornaOrariPerGiornoSelezionato();
+        } catch(e) { console.error("Errore configurazione orari/logo"); }
+    }
+
+    function aggiornaOrariPerGiornoSelezionato() {
+        const inputData = document.getElementById('dataGiorno').value;
+        const selectOra = document.getElementById('oraSlot');
+        selectOra.innerHTML = '<option value="">-- Seleziona Ora --</option>';
+
+        if(!inputData || !configGlobale) return;
+
+        const dataObj = new Date(inputData);
+        const gIdx = str = dataObj.getDay().toString(); // 0=Domenica, 1=Lunedì...
+
+        const infoGiorno = configGlobale.orari_settimana[gIdx];
+
+        if(!infoGiorno || !infoGiorno.aperto) {
+            selectOra.innerHTML = '<option value="">Chiuso in questo giorno</option>';
+            return;
+        }
+
+        const generaOrariTurno = (oraApertura, oraChiusura) => {
+            if(!oraApertura || !oraChiusura) return;
+            const [hApertura] = oraApertura.split(':').map(Number);
+            const [hChiusura] = oraChiusura.split(':').map(Number);
+
+            for (let h = hApertura; h < hChiusura; h++) {
+                for (let m = 0; m < 60; m += 15) {
+                    const hh = h.toString().padStart(2, '0');
+                    const mm = m.toString().padStart(2, '0');
+                    const option = document.createElement('option');
+                    option.value = `${hh}:${mm}`;
+                    option.textContent = `${hh}:${mm}`;
+                    selectOra.appendChild(option);
+                }
+            }
+        };
+
+        generaOrariTurno(infoGiorno.am_a, infoGiorno.am_c);
+        generaOrariTurno(infoGiorno.pm_a, infoGiorno.pm_c);
+    }
+
     function mostraTab(tab) {
         document.getElementById('sezionePrenota').classList.add('hidden');
         document.getElementById('sezioneMiei').classList.add('hidden');
@@ -192,14 +220,18 @@
     async function effettuaPrenotazione() {
         const nome = document.getElementById('nome').value.trim();
         const telefono = document.getElementById('telefono').value.trim();
+        const pin = document.getElementById('pin').value.trim();
         const servizioId = document.getElementById('servizio').value;
-        const dataOraVal = document.getElementById('dataOra').value;
+        const dataGiorno = document.getElementById('dataGiorno').value;
+        const oraSlot = document.getElementById('oraSlot').value;
         const esitoDiv = document.getElementById('esitoPrenotazione');
 
-        if (!nome || !telefono || !servizioId || !dataOraVal) {
+        if (!nome || !telefono || !pin || !servizioId || !dataGiorno || !oraSlot) {
             alert('Per favore, compila tutti i campi!');
             return;
         }
+
+        const dataOraVal = `${dataGiorno}T${oraSlot}:00`;
 
         esitoDiv.style.color = '#333';
         esitoDiv.textContent = 'Verifica disponibilità...';
@@ -211,8 +243,9 @@
                 body: JSON.stringify({
                     nome_cliente: nome,
                     telefono_cliente: telefono,
+                    pin: pin,
                     servizio_id: parseInt(servizioId),
-                    data_ora_richiesta: dataOraVal + ':00'
+                    data_ora_richiesta: dataOraVal
                 })
             });
 
@@ -223,7 +256,7 @@
                 esitoDiv.textContent = res.messaggio;
             } else {
                 esitoDiv.style.color = '#e03131';
-                esitoDiv.textContent = res.detail || 'Orario non disponibile.';
+                esitoDiv.textContent = res.detail || 'Errore nella prenotazione.';
             }
         } catch (err) {
             esitoDiv.style.color = '#e03131';
@@ -233,35 +266,73 @@
 
     async function cercaAppuntamenti() {
         const telefono = document.getElementById('telefonoRicerca').value.trim();
+        const pin = document.getElementById('pinRicerca').value.trim();
         const lista = document.getElementById('listaAppuntamenti');
         lista.innerHTML = "";
 
-        if (!telefono) {
-            alert("Inserisci un numero di telefono!");
+        if (!telefono || !pin) {
+            alert("Inserisci telefono e PIN!");
             return;
         }
 
         try {
-            const response = await fetch(`/api/miei-appuntamenti/${encodeURIComponent(telefono)}`);
+            const response = await fetch('/api/miei-appuntamenti', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telefono: telefono, pin: pin })
+            });
+
             const dati = await response.json();
 
+            if (!response.ok) {
+                alert(dati.detail || "Errore durante l'accesso.");
+                return;
+            }
+
             if (dati.length === 0) {
-                lista.innerHTML = "<li>Nessun appuntamento trovato per questo numero.</li>";
+                lista.innerHTML = "<li>Nessun appuntamento trovato.</li>";
                 return;
             }
 
             dati.forEach(app => {
                 const li = document.createElement('li');
+                let badgeHtml = '';
+                let azionSpostatoHtml = '';
+
+                if (app.stato === 'in_attesa') badgeHtml = '<span class="badge badge-attesa">In attesa di conferma</span>';
+                else if (app.stato === 'confermato') badgeHtml = '<span class="badge badge-confermato">Confermato dal centro</span>';
+                else if (app.stato === 'spostato') {
+                    badgeHtml = '<span class="badge badge-spostato">Orario proposto dal centro</span>';
+                    azionSpostatoHtml = `<button class="btn-accetta" onclick="accettaSpostamento(${app.id})">Accetta Nuovo Orario</button>`;
+                }
+
                 li.innerHTML = `<strong>${app.servizio}</strong><br>
-                                📅 ${app.data_ora}<br>
-                                ⏱️ Durata: ${app.durata_minuti} min`;
+                                Data e Ora: ${app.data_ora} (${app.durata_minuti} min)<br>
+                                Operatrice: <b>${app.operatrice}</b><br>
+                                ${badgeHtml}
+                                ${azionSpostatoHtml}`;
                 lista.appendChild(li);
             });
-        } catch (error) {
-            alert("Errore durante la ricerca.");
-        }
+        } catch (error) { alert("Errore durante la ricerca."); }
     }
 
+    async function accettaSpostamento(id) {
+        try {
+            const res = await fetch(`/api/appuntamenti/${id}/accetta-spostamento`, { method: 'POST' });
+            if (res.ok) { alert("Orario accettato!"); cercaAppuntamenti(); }
+        } catch (e) { alert("Errore operazione."); }
+    }
+
+    function recuperaPinWhatsApp() {
+        const tel = document.getElementById('telefonoRicerca').value.trim();
+        const numeroSalone = "393331234567";
+        let testo = "Ciao! Ho dimenticato il PIN del mio account.";
+        if (tel) testo += ` Il mio numero e': ${tel}`;
+        window.open(`https://wa.me/${numeroSalone}?text=${encodeURIComponent(testo)}`, '_blank');
+    }
+
+    impostaDataMinimaDomani();
+    caricaConfigurazioni();
     caricaServizi();
 </script>
 
