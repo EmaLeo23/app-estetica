@@ -1,10 +1,16 @@
+import os
+import secrets
+import json
+from datetime import datetime, timedelta
+from typing import Optional
+
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta, date
 from pydantic import BaseModel
-import json
+
 import models
 
 app = FastAPI(title="Booking API Advanced Multi-Staff")
@@ -12,10 +18,25 @@ app = FastAPI(title="Booking API Advanced Multi-Staff")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+security = HTTPBasic()
+ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "estetica2026")
+
+def verifica_credenziali_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    utente_corretto = secrets.compare_digest(credentials.username, ADMIN_USER)
+    password_corretta = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+    if not (utente_corretto and password_corretta):
+        raise HTTPException(
+            status_code=401,
+            detail="Credenziali non valide.",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
 def get_db():
     db = models.SessionLocal()
@@ -42,13 +63,13 @@ class ConfermaPrenotazione(BaseModel):
 
 class SpostamentoAppuntamento(BaseModel):
     nuovo_inizio: datetime
-    operatrice: str = "Non Assegnata"
+    operatore: Optional[str] = None
 
-class AssegnaOperatriceRequest(BaseModel):
-    operatrice: str
+class AssegnaOperatoreRequest(BaseModel):
+    operatore: str
 
 class ImpostazioniRequest(BaseModel):
-    num_operatrici: int
+    nomi_operatori: str
     logo_url: str
     orari_settimana: dict
 
@@ -64,24 +85,24 @@ def valida_slot_15_minuti(dt: datetime):
     if dt.minute % 15 != 0 or dt.second != 0:
         raise HTTPException(status_code=400, detail="Gli orari devono essere a scatti di 15 minuti.")
 
+def valida_pin(pin: str):
+    if len(pin) != 4 or not pin.isdigit():
+        raise HTTPException(status_code=400, detail="Il PIN deve essere composto da 4 cifre.")
+
 def verifica_disponibilita_slot(db: Session, servizio_id: int, inizio: datetime, escludi_id: int = None):
     valida_slot_15_minuti(inizio)
-
-    if inizio.date() <= date.today():
-        raise HTTPException(status_code=400, detail="Non e' possibile prenotare per il giorno stesso o per date passate.")
 
     config = get_config(db)
     orari_dict = json.loads(config.orari_settimana)
 
-    # Convertiamo il giorno della settimana (0=Domenica, 1=Lunedì, ..., 6=Sabato)
     weekday_idx = str((inizio.weekday() + 1) % 7)
     info_giorno = orari_dict.get(weekday_idx, {"aperto": False})
 
     if not info_giorno.get("aperto"):
-        raise HTTPException(status_code=400, detail="Il centro estetico e' chiuso nel giorno selezionato.")
+        raise HTTPException(status_code=400, detail="Il centro e' chiuso nel giorno selezionato.")
 
     ora_inizio_str = inizio.strftime("%H:%M")
-    
+
     in_mattina = False
     if info_giorno.get("am_a") and info_giorno.get("am_c"):
         in_mattina = info_giorno["am_a"] <= ora_inizio_str < info_giorno["am_c"]
@@ -107,7 +128,10 @@ def verifica_disponibilita_slot(db: Session, servizio_id: int, inizio: datetime,
         query = query.filter(models.Prenotazione.id != escludi_id)
 
     sovrapposizioni = query.count()
-    disponibile = sovrapposizioni < config.num_operatrici
+    list_operatori = [op.strip() for op in config.nomi_operatori.split(',') if op.strip()]
+    capienza_massima = max(len(list_operatori), 1)
+
+    disponibile = sovrapposizioni < capienza_massima
 
     return disponibile, inizio, fine, servizio
 
@@ -119,32 +143,36 @@ def get_servizi(db: Session = Depends(get_db)):
 @app.get("/api/config")
 def get_impostazioni(db: Session = Depends(get_db)):
     config = get_config(db)
+    orari = json.loads(config.orari_settimana) if config.orari_settimana else {}
     return {
-        "num_operatrici": config.num_operatrici,
+        "nomi_operatori": config.nomi_operatori,
         "logo_url": config.logo_url,
-        "orari_settimana": json.loads(config.orari_settimana)
+        "orari_settimana": orari
     }
 
 @app.post("/api/admin/config")
-def salva_impostazioni(dati: ImpostazioniRequest, db: Session = Depends(get_db)):
+def salva_impostazioni(
+    dati: ImpostazioniRequest,
+    db: Session = Depends(get_db),
+    _: str = Depends(verifica_credenziali_admin),
+):
     config = get_config(db)
-    config.num_operatrici = dati.num_operatrici
+    config.nomi_operatori = dati.nomi_operatori
     config.logo_url = dati.logo_url
     config.orari_settimana = json.dumps(dati.orari_settimana)
     db.commit()
-    return {"status": "ok", "messaggio": "Impostazioni aggiornate con successo!"}
+    return {"status": "ok", "messaggio": "Impostazioni salvate!"}
 
 @app.post("/api/prenota")
 def crea_prenotazione(dati: ConfermaPrenotazione, db: Session = Depends(get_db)):
-    if len(dati.pin) != 4 or not dati.pin.isdigit():
-        raise HTTPException(status_code=400, detail="Il PIN deve essere composto da 4 cifre.")
+    valida_pin(dati.pin)
 
     disponibile, inizio, fine, servizio = verifica_disponibilita_slot(
         db, dati.servizio_id, dati.data_ora_richiesta
     )
 
     if not disponibile:
-        raise HTTPException(status_code=400, detail="Tutte le operatrici sono occupate in questo orario!")
+        raise HTTPException(status_code=400, detail="Tutti gli operatori sono occupati in questo orario!")
 
     utente = db.query(models.Utente).filter(models.Utente.telefono == dati.telefono_cliente).first()
     if not utente:
@@ -154,7 +182,7 @@ def crea_prenotazione(dati: ConfermaPrenotazione, db: Session = Depends(get_db))
         db.refresh(utente)
     else:
         if utente.pin != dati.pin:
-            raise HTTPException(status_code=401, detail="PIN errato per questo numero di telefono!")
+            raise HTTPException(status_code=401, detail="PIN errato!")
 
     nuova_prenotazione = models.Prenotazione(
         utente_id=utente.id,
@@ -162,123 +190,128 @@ def crea_prenotazione(dati: ConfermaPrenotazione, db: Session = Depends(get_db))
         inizio=inizio,
         fine=fine,
         stato="in_attesa",
-        operatrice="Non Assegnata"
+        operatore="Non Assegnato"
     )
     db.add(nuova_prenotazione)
     db.commit()
+    db.refresh(nuova_prenotazione)
 
     return {
-        "status": "ok", 
-        "messaggio": f"Richiesta inviata! La prenotazione per {servizio.nome} e' in attesa di conferma."
+        "status": "ok",
+        "messaggio": f"Richiesta per {servizio.nome} inviata.",
+        "id": nuova_prenotazione.id,
     }
 
 @app.post("/api/miei-appuntamenti")
 def get_miei_appuntamenti(richiesta: RichiestaMieiAppuntamenti, db: Session = Depends(get_db)):
     utente = db.query(models.Utente).filter(models.Utente.telefono == richiesta.telefono).first()
-    if not utente:
-        raise HTTPException(status_code=404, detail="Nessun utente trovato.")
+    if not utente or utente.pin != richiesta.pin:
+        raise HTTPException(status_code=401, detail="Credenziali errate.")
 
-    if utente.pin != richiesta.pin:
-        raise HTTPException(status_code=401, detail="PIN errato!")
+    appuntamenti = db.query(models.Prenotazione).filter(
+        models.Prenotazione.utente_id == utente.id
+    ).order_by(models.Prenotazione.inizio.desc()).all()
 
-    appuntamenti = db.query(models.Prenotazione).filter(models.Prenotazione.utente_id == utente.id).order_by(models.Prenotazione.inizio.desc()).all()
-    
-    risultato = []
-    for app in appuntamenti:
-        risultato.append({
-            "id": app.id,
-            "servizio": app.servizio.nome,
-            "data_ora": app.inizio.strftime("%d/%m/%Y %H:%M"),
-            "durata_minuti": app.servizio.durata_minuti,
-            "stato": app.stato,
-            "operatrice": app.operatrice
-        })
-    return risultato
+    return [{
+        "id": app.id,
+        "servizio": app.servizio.nome,
+        "data_ora": app.inizio.strftime("%d/%m/%Y %H:%M"),
+        "durata_minuti": app.servizio.durata_minuti,
+        "stato": app.stato,
+        "operatore": app.operatore
+    } for app in appuntamenti]
 
 @app.post("/api/appuntamenti/{id}/accetta-spostamento")
-def accetta_spostamento(id: int, db: Session = Depends(get_db)):
-    app = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
-    if not app:
-        raise HTTPException(status_code=404, detail="Appuntamento non trovato")
-    app.stato = "confermato"
+def accetta_spostamento_cliente(id: int, db: Session = Depends(get_db)):
+    app_ = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
+    if not app_:
+        raise HTTPException(status_code=404, detail="Appuntamento non trovato.")
+    app_.stato = "confermato"
     db.commit()
     return {"status": "ok"}
-
-# --- ENDPOINT ADMIN ---
 
 @app.get("/api/admin/tutti-appuntamenti")
-def get_tutti_appuntamenti(db: Session = Depends(get_db)):
+def get_tutti_appuntamenti(db: Session = Depends(get_db), _: str = Depends(verifica_credenziali_admin)):
     appuntamenti = db.query(models.Prenotazione).order_by(models.Prenotazione.inizio.asc()).all()
-    
-    risultato = []
-    for app in appuntamenti:
-        risultato.append({
-            "id": app.id,
-            "cliente_nome": app.utente.nome,
-            "cliente_telefono": app.utente.telefono,
-            "cliente_pin": app.utente.pin,
-            "servizio": app.servizio.nome,
-            "servizio_id": app.servizio_id,
-            "inizio": app.inizio.strftime("%d/%m/%Y %H:%M"),
-            "fine": app.fine.strftime("%H:%M"),
-            "durata_minuti": app.servizio.durata_minuti,
-            "stato": app.stato or "in_attesa",
-            "operatrice": app.operatrice or "Non Assegnata"
-        })
-    return risultato
+    return [{
+        "id": app.id,
+        "cliente_nome": app.utente.nome,
+        "cliente_telefono": app.utente.telefono,
+        "cliente_pin": app.utente.pin,
+        "servizio": app.servizio.nome,
+        "servizio_id": app.servizio_id,
+        "inizio": app.inizio.strftime("%d/%m/%Y %H:%M"),
+        "fine": app.fine.strftime("%H:%M"),
+        "durata_minuti": app.servizio.durata_minuti,
+        "stato": app.stato or "in_attesa",
+        "operatore": app.operatore or "Non Assegnato"
+    } for app in appuntamenti]
 
 @app.post("/api/admin/conferma/{id}")
-def conferma_appuntamento(id: int, db: Session = Depends(get_db)):
-    app = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
-    if not app:
-        raise HTTPException(status_code=404, detail="Appuntamento non trovato")
-    app.stato = "confermato"
+def conferma_appuntamento(id: int, db: Session = Depends(get_db), _: str = Depends(verifica_credenziali_admin)):
+    app_ = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
+    if not app_:
+        raise HTTPException(status_code=404, detail="Appuntamento non trovato.")
+    app_.stato = "confermato"
     db.commit()
     return {"status": "ok"}
 
-@app.put("/api/admin/assegna-operatrice/{id}")
-def assegna_operatrice(id: int, dati: AssegnaOperatriceRequest, db: Session = Depends(get_db)):
-    app = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
-    if not app:
-        raise HTTPException(status_code=404, detail="Appuntamento non trovato")
-    app.operatrice = dati.operatrice
+@app.put("/api/admin/assegna-operatore/{id}")
+def assegna_operatore(
+    id: int,
+    dati: AssegnaOperatoreRequest,
+    db: Session = Depends(get_db),
+    _: str = Depends(verifica_credenziali_admin),
+):
+    app_ = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
+    if not app_:
+        raise HTTPException(status_code=404, detail="Appuntamento non trovato.")
+    app_.operatore = dati.operatore
     db.commit()
     return {"status": "ok"}
 
 @app.put("/api/admin/sposta/{id}")
-def sposta_appuntamento(id: int, dati: SpostamentoAppuntamento, db: Session = Depends(get_db)):
-    app = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
-    if not app:
-        raise HTTPException(status_code=404, detail="Appuntamento non trovato")
-    
-    disponibile, inizio, fine, _ = verifica_disponibilita_slot(
-        db, app.servizio_id, dati.nuovo_inizio, escludi_id=id
-    )
-    if not disponibile:
-        raise HTTPException(status_code=400, detail="Nuovo orario occupato!")
+def sposta_appuntamento(
+    id: int,
+    dati: SpostamentoAppuntamento,
+    db: Session = Depends(get_db),
+    _: str = Depends(verifica_credenziali_admin),
+):
+    app_ = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
+    if not app_:
+        raise HTTPException(status_code=404, detail="Appuntamento non trovato.")
 
-    app.inizio = inizio
-    app.fine = fine
-    app.stato = "spostato"
-    if dati.operatrice:
-        app.operatrice = dati.operatrice
+    disponibile, inizio, fine, _s = verifica_disponibilita_slot(db, app_.servizio_id, dati.nuovo_inizio, escludi_id=id)
+    if not disponibile:
+        raise HTTPException(status_code=400, detail="Slot occupato")
+
+    app_.inizio = inizio
+    app_.fine = fine
+    app_.stato = "spostato"
+    if dati.operatore is not None:
+        app_.operatore = dati.operatore
     db.commit()
     return {"status": "ok"}
 
 @app.delete("/api/admin/cancella/{id}")
-def cancella_appuntamento(id: int, db: Session = Depends(get_db)):
-    app = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
-    if not app:
-        raise HTTPException(status_code=404, detail="Appuntamento non trovato")
-    db.delete(app)
+def cancella_appuntamento(id: int, db: Session = Depends(get_db), _: str = Depends(verifica_credenziali_admin)):
+    app_ = db.query(models.Prenotazione).filter(models.Prenotazione.id == id).first()
+    if not app_:
+        raise HTTPException(status_code=404, detail="Appuntamento non trovato.")
+    db.delete(app_)
     db.commit()
     return {"status": "ok"}
 
 @app.post("/api/admin/reset-pin")
-def reset_pin_utente(dati: ResetPinRequest, db: Session = Depends(get_db)):
+def reset_pin_utente(
+    dati: ResetPinRequest,
+    db: Session = Depends(get_db),
+    _: str = Depends(verifica_credenziali_admin),
+):
+    valida_pin(dati.nuovo_pin)
     utente = db.query(models.Utente).filter(models.Utente.telefono == dati.telefono).first()
     if not utente:
-        raise HTTPException(status_code=404, detail="Utente non trovato.")
+        raise HTTPException(status_code=404, detail="Cliente non trovato.")
     utente.pin = dati.nuovo_pin
     db.commit()
     return {"status": "ok"}
@@ -288,5 +321,5 @@ def mostra_pagina_web():
     return FileResponse("index.html")
 
 @app.get("/dashboard")
-def mostra_dashboard():
+def mostra_dashboard(_: str = Depends(verifica_credenziali_admin)):
     return FileResponse("dashboard.html")

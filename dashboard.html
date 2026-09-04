@@ -3,60 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda Calendario - Centro Estetico</title>
+    <title>Agenda Operatori - Centro Estetico</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales/it.global.min.js"></script>
 
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f8f9fa; margin: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .header-dashboard { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .logo-dash { max-height: 50px; border-radius: 8px; }
-        h1 { color: #d63384; margin: 0; font-size: 24px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #f4f6f9; margin: 15px; color: #333; }
+        .container { max-width: 1350px; margin: 0 auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
         
-        .btn-settings-open {
-            background-color: #495057; color: white; border: none; padding: 10px 16px; border-radius: 8px;
-            font-weight: bold; cursor: pointer; font-size: 14px;
-        }
+        .header-dashboard { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .logo-dash { max-height: 55px; border-radius: 10px; }
+        h1 { color: #d63384; margin: 0; font-size: 22px; font-weight: 800; }
 
-        .legenda { display: flex; gap: 15px; margin-bottom: 15px; font-size: 14px; font-weight: bold; }
+        .action-btns { display: flex; gap: 10px; }
+        .btn-add { background-color: #d63384; color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        .btn-settings { background-color: #495057; color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+
+        .toolbar { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 12px 18px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e9ecef; }
+        .date-picker-group { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        .date-picker-group input { padding: 8px 12px; border-radius: 8px; border: 1.5px solid #ced4da; font-size: 14px; font-weight: 600; }
+
+        .view-switch { display: flex; background: #e9ecef; border-radius: 10px; padding: 3px; }
+        .view-btn { border: none; background: transparent; padding: 8px 14px; font-weight: 700; font-size: 13px; border-radius: 8px; cursor: pointer; color: #495057; }
+        .view-btn.active { background: white; color: #d63384; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+
+        .legenda { display: flex; gap: 18px; font-size: 13px; font-weight: bold; }
         .legenda-item { display: flex; align-items: center; gap: 6px; }
-        .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
         .dot-giallo { background-color: #f59f00; }
         .dot-verde { background-color: #2b8a3e; }
         .dot-blu { background-color: #1971c2; }
 
-        #calendar { margin-top: 15px; }
-        .fc-event { cursor: pointer; border-radius: 6px; padding: 2px 4px; border: none !important; color: white !important; }
+        /* VISTA GIORNALIERA CUSTOM */
+        .calendar-wrapper { display: flex; border: 1px solid #dee2e6; border-radius: 12px; overflow: hidden; background: #fff; margin-top: 15px; }
+        .time-sidebar { width: 70px; flex-shrink: 0; border-right: 2px solid #dee2e6; background: #f8f9fa; }
+        .time-header { height: 45px; border-bottom: 2px solid #dee2e6; background: #e9ecef; }
+        .time-slot-label { height: 40px; border-bottom: 1px solid #e9ecef; font-size: 11px; font-weight: bold; color: #6c757d; text-align: center; line-height: 40px; box-sizing: border-box; }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;
+        .columns-container { display: flex; flex-grow: 1; overflow-x: auto; }
+        .op-column { flex: 1; min-width: 200px; border-right: 1px solid #dee2e6; position: relative; }
+        .op-column:last-child { border-right: none; }
+        
+        .op-header { height: 45px; background: #f1f3f5; border-bottom: 2px solid #dee2e6; text-align: center; line-height: 45px; font-weight: 800; color: #d63384; font-size: 15px; }
+        .op-header.unassigned { color: #e03131; background: #fff5f5; }
+
+        .op-body { position: relative; height: 960px; }
+        .op-slot-bg { height: 40px; border-bottom: 1px solid #f1f3f5; box-sizing: border-box; }
+
+        .appointment-card {
+            position: absolute;
+            border-radius: 8px; color: white; padding: 4px 6px;
+            font-size: 11px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15); z-index: 10;
+            box-sizing: border-box; overflow: hidden;
+            word-break: break-word;
         }
-        .modal-content {
-            background: white; padding: 25px; border-radius: 12px; width: 95%; max-width: 650px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; max-height: 90vh; overflow-y: auto;
-        }
+        .app-giallo { background-color: #f59f00; border-left: 4px solid #d9480f; }
+        .app-verde { background-color: #2b8a3e; border-left: 4px solid #1b5e20; }
+        .app-blu { background-color: #1971c2; border-left: 4px solid #1864ab; }
+
+        /* VISTA SETTIMANALE FULLCALENDAR */
+        #calendarWeekly { margin-top: 15px; }
+        .fc-event { cursor: pointer; border-radius: 6px; padding: 3px 6px; border: none !important; color: white !important; font-weight: bold; font-size: 11px; }
+
+        /* MODALI */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 95%; max-width: 600px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; text-align: center; }
         .modal-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .btn-modal { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn-modal { padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; }
         .btn-conferma { background-color: #2b8a3e; color: white; }
         .btn-sposta { background-color: #1971c2; color: white; }
-        .btn-operatrice { background-color: #7048e8; color: white; }
+        .btn-operatore { background-color: #7048e8; color: white; }
         .btn-reset { background-color: #f59f00; color: white; }
         .btn-cancella { background-color: #e03131; color: white; }
         .btn-chiudi { background-color: #6c757d; color: white; }
         .hidden { display: none; }
 
         .form-group-modal { margin-bottom: 12px; text-align: left; }
-        .form-group-modal label { font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px; }
-        .form-group-modal input, .form-group-modal select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+        .form-group-modal label { font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px; color: #495057; }
+        .form-group-modal input, .form-group-modal select { width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid #ced4da; box-sizing: border-box; }
         
-        .table-orari { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; text-align: left; }
-        .table-orari th, .table-orari td { padding: 8px 4px; border-bottom: 1px solid #dee2e6; }
-        .table-orari input[type="time"] { padding: 4px; font-size: 12px; width: 75px; }
-        .table-orari input[type="checkbox"] { transform: scale(1.3); cursor: pointer; }
+        .table-orari { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; text-align: left; }
+        .table-orari th, .table-orari td { padding: 6px 4px; border-bottom: 1px solid #dee2e6; }
+        .table-orari input[type="time"] { padding: 4px; font-size: 11px; width: 75px; }
+
+        .row-time { display: flex; gap: 10px; }
     </style>
 </head>
 <body>
@@ -65,18 +98,84 @@
     <div class="header-dashboard">
         <div class="header-left">
             <img id="dashLogo" class="logo-dash" src="" alt="Logo">
-            <h1>Agenda Salone - Dashboard</h1>
+            <h1>Agenda Salone</h1>
         </div>
-        <button class="btn-settings-open" onclick="apriModalImpostazioni()">⚙️ Impostazioni Salone</button>
-    </div>
-    
-    <div class="legenda">
-        <div class="legenda-item"><span class="dot dot-giallo"></span> In Attesa</div>
-        <div class="legenda-item"><span class="dot dot-verde"></span> Confermato</div>
-        <div class="legenda-item"><span class="dot dot-blu"></span> Spostato / Proposto</div>
+        <div class="action-btns">
+            <button class="btn-add" onclick="apriModalNuovaPrenotazione()">➕ Nuova Prenotazione</button>
+            <button class="btn-settings" onclick="apriModalImpostazioni()">⚙️ Impostazioni Salone</button>
+        </div>
     </div>
 
-    <div id="calendar"></div>
+    <div class="toolbar">
+        <div class="date-picker-group" id="boxDatePicker">
+            <label for="pickerData">📅 Data:</label>
+            <input type="date" id="pickerData" onchange="caricaGrigliaOperatori()">
+            <button onclick="oggiAgenda()" style="padding: 8px 12px; border-radius:8px; border:none; background:#e9ecef; font-weight:bold; cursor:pointer;">Oggi</button>
+        </div>
+
+        <div class="view-switch">
+            <button id="btnViewDaily" class="view-btn active" onclick="cambiaVistaAgenda('giorno')">Vista Giornaliera (Operatori)</button>
+            <button id="btnViewWeekly" class="view-btn" onclick="cambiaVistaAgenda('settimana')">Vista Settimanale (Panoramica)</button>
+        </div>
+
+        <div class="legenda" id="boxLegenda">
+            <div class="legenda-item"><span class="dot dot-giallo"></span> In Attesa</div>
+            <div class="legenda-item"><span class="dot dot-verde"></span> Confermato</div>
+            <div class="legenda-item"><span class="dot dot-blu"></span> Spostato</div>
+        </div>
+    </div>
+
+    <!-- VISTA 1: GRIGLIA GIORNALIERA OPERATORI -->
+    <div class="calendar-wrapper" id="viewDailyContainer">
+        <div class="time-sidebar">
+            <div class="time-header"></div>
+            <div id="timeSlotsContainer"></div>
+        </div>
+        <div class="columns-container" id="columnsContainer"></div>
+    </div>
+
+    <!-- VISTA 2: SETTIMANALE FULLCALENDAR -->
+    <div id="calendarWeekly" class="hidden"></div>
+</div>
+
+<!-- POP-UP NUOVA PRENOTAZIONE MANUALE -->
+<div id="modalNuovaPrenotazione" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 450px;">
+        <h3 style="margin-top:0; color:#d63384;">➕ Inserisci Prenotazione Manuale</h3>
+        
+        <div class="form-group-modal">
+            <label>Nome e Cognome Cliente:</label>
+            <input type="text" id="nuovoNome" placeholder="es. Maria Rossi">
+        </div>
+
+        <div class="form-group-modal">
+            <label>Telefono Cliente:</label>
+            <input type="tel" id="nuovoTelefono" placeholder="es. 3331234567">
+        </div>
+
+        <div class="form-group-modal">
+            <label>Trattamento / Servizio:</label>
+            <select id="nuovoServizio"></select>
+        </div>
+
+        <div class="form-group-modal">
+            <label>Operatore Assegnato:</label>
+            <select id="nuovoOperatore"></select>
+        </div>
+
+        <div class="form-group-modal">
+            <label>Giorno e Ora Inizio:</label>
+            <div class="row-time">
+                <input type="date" id="nuovaData">
+                <select id="nuovaOra"></select>
+            </div>
+        </div>
+
+        <div class="modal-btns">
+            <button class="btn-modal btn-conferma" onclick="salvaNuovaPrenotazioneManuale()">Salva in Agenda</button>
+            <button class="btn-modal btn-chiudi" onclick="chiudiModalNuovaPrenotazione()">Annulla</button>
+        </div>
+    </div>
 </div>
 
 <!-- POP-UP IMPOSTAZIONI SALONE -->
@@ -90,23 +189,21 @@
         </div>
 
         <div class="form-group-modal">
-            <label>Numero Operatrici Contemporanee:</label>
-            <input type="number" id="cfgOperatrici" min="1" max="10" value="2">
+            <label>Elenco Operatori (separati da virgola):</label>
+            <input type="text" id="cfgOperatori" placeholder="es. Elena, Lucia, Marco">
         </div>
 
-        <h4 style="margin: 15px 0 5px 0; text-align:left; color:#495057;">Orari per Ciascun Giorno:</h4>
-        
+        <h4 style="margin: 15px 0 5px 0; text-align:left; color:#495057;">Orari Settimanali:</h4>
         <table class="table-orari">
             <thead>
                 <tr>
                     <th>Giorno</th>
                     <th>Aperto</th>
-                    <th>Turno Mattina</th>
-                    <th>Turno Pomeriggio</th>
+                    <th>Mattina</th>
+                    <th>Pomeriggio</th>
                 </tr>
             </thead>
-            <tbody id="bodyOrariSettimana">
-            </tbody>
+            <tbody id="bodyOrariSettimana"></tbody>
         </table>
 
         <div class="modal-btns">
@@ -122,13 +219,13 @@
         <h3 style="margin-top:0; color:#d63384;">Gestione Appuntamento</h3>
         <p id="modalInfoText" style="text-align:left; font-size:14px; line-height:1.5;"></p>
 
-        <div id="boxOperatriceForm" class="form-group-modal hidden" style="background:#f1f3f5; padding:10px; border-radius:8px;">
-            <label for="nomeOperatriceInput">Nome Operatrice / Staff:</label>
-            <input type="text" id="nomeOperatriceInput" placeholder="es. Elena, Lucia">
-            <button class="btn-modal btn-operatrice" style="margin-top:10px; width:100%;" onclick="salvaSoloOperatrice()">Salva Operatrice (Senza Notifica)</button>
+        <div id="boxOperatoreForm" class="form-group-modal hidden" style="background:#f1f3f5; padding:12px; border-radius:10px;">
+            <label for="selectOperatoreInput">Assegna a Operatore:</label>
+            <select id="selectOperatoreInput"></select>
+            <button class="btn-modal btn-operatore" style="margin-top:10px; width:100%;" onclick="salvaSoloOperatore()">Salva Operatore</button>
         </div>
 
-        <div id="boxSpostaForm" class="form-group-modal hidden" style="background:#f1f3f5; padding:10px; border-radius:8px;">
+        <div id="boxSpostaForm" class="form-group-modal hidden" style="background:#f1f3f5; padding:12px; border-radius:10px;">
             <label for="spostaDataGiorno">Scegli Nuovo Giorno:</label>
             <input type="date" id="spostaDataGiorno">
             
@@ -140,8 +237,8 @@
 
         <div class="modal-btns">
             <button class="btn-modal btn-conferma" onclick="confermaDaModal()">Conferma e Avvisa WhatsApp</button>
-            <button class="btn-modal btn-operatrice" onclick="mostraFormOperatrice()">Assegna Operatrice</button>
-            <button class="btn-modal btn-sposta" onclick="mostraFormSposta()">Sposta Appuntamento</button>
+            <button class="btn-modal btn-operatore" onclick="mostraFormOperatore()">Cambia Operatore</button>
+            <button class="btn-modal btn-sposta" onclick="mostraFormSposta()">Sposta Orario</button>
             <button class="btn-modal btn-reset" onclick="resettaPinCliente()">Resetta PIN Cliente</button>
             <button class="btn-modal btn-cancella" onclick="cancellaDaModal()">Cancella Appuntamento</button>
             <button class="btn-modal btn-chiudi" onclick="chiudiModalAzione()">Chiudi</button>
@@ -150,57 +247,321 @@
 </div>
 
 <script>
-    let appuntamentoCorrente = null;
-    let eventoCalendarCorrente = null;
     let configGlobale = null;
+    let appuntamentiTutti = [];
+    let appuntamentoCorrente = null;
+    let fullCalendarInstance = null;
+    let vistaAttuale = 'giorno';
+    
     const nomiGiorni = { "1": "Lunedì", "2": "Martedì", "3": "Mercoledì", "4": "Giovedì", "5": "Venerdì", "6": "Sabato", "0": "Domenica" };
     const ordineGiorni = ["1", "2", "3", "4", "5", "6", "0"];
+    const tavolozzaColori = ["#7048e8", "#4c6ef5", "#f59f00", "#12b886", "#e8590c", "#20c997", "#d63384"];
     const LINK_APP = "http://127.0.0.1:8000";
+
+    document.getElementById('pickerData').valueAsDate = new Date();
+
+    // Utility per formattare la data/ora in stringa locale ISO senza conversione UTC
+    function formattaDataLocaleIso(d) {
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
 
     async function caricaImpostazioni() {
         try {
             const res = await fetch('/api/config');
             configGlobale = await res.json();
             
-            document.getElementById('cfgOperatrici').value = configGlobale.num_operatrici || 2;
+            document.getElementById('cfgOperatori').value = configGlobale.nomi_operatori || 'Elena, Lucia';
             document.getElementById('cfgLogoUrl').value = configGlobale.logo_url || '';
             
-            if(configGlobale.logo_url) {
-                document.getElementById('dashLogo').src = configGlobale.logo_url;
-            }
+            if(configGlobale.logo_url) document.getElementById('dashLogo').src = configGlobale.logo_url;
 
             costruisciTabellaGiorni(configGlobale.orari_settimana || {});
+            aggiornaSelectOperatori();
+            await caricaServiziModal();
             return configGlobale;
         } catch(e) {
             costruisciTabellaGiorni({});
         }
     }
 
+    async function caricaServiziModal() {
+        try {
+            const res = await fetch('/api/servizi');
+            const servizi = await res.json();
+            const sel = document.getElementById('nuovoServizio');
+            sel.innerHTML = '';
+            servizi.forEach(s => {
+                sel.appendChild(new Option(`${s.nome} (${s.durata} min)`, s.id));
+            });
+        } catch(e) {}
+    }
+
+    function aggiornaSelectOperatori() {
+        const select = document.getElementById('selectOperatoreInput');
+        const selectNuovo = document.getElementById('nuovoOperatore');
+        select.innerHTML = '<option value="Non Assegnato">-- Non Assegnato --</option>';
+        selectNuovo.innerHTML = '<option value="Non Assegnato">-- Non Assegnato --</option>';
+
+        if (configGlobale && configGlobale.nomi_operatori) {
+            configGlobale.nomi_operatori.split(',').forEach(op => {
+                const oClean = op.trim();
+                if(oClean) {
+                    select.appendChild(new Option(oClean, oClean));
+                    selectNuovo.appendChild(new Option(oClean, oClean));
+                }
+            });
+        }
+    }
+
     function costruisciTabellaGiorni(orariDict) {
         const tbody = document.getElementById('bodyOrariSettimana');
         tbody.innerHTML = '';
-
         ordineGiorni.forEach(gIdx => {
-            const info = orariDict[gIdx] || { 
-                aperto: (gIdx !== "0" && gIdx !== "1"),
-                am_a: '08:30', am_c: '12:30', pm_a: '14:30', pm_c: '19:30' 
-            };
-
+            const info = orariDict[gIdx] || { aperto: (gIdx !== "0" && gIdx !== "1"), am_a: '08:30', am_c: '12:30', pm_a: '14:30', pm_c: '19:30' };
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${nomiGiorni[gIdx]}</strong></td>
                 <td style="text-align:center;"><input type="checkbox" id="chk_${gIdx}" ${info.aperto ? 'checked' : ''}></td>
-                <td>
-                    <input type="time" id="am_a_${gIdx}" value="${info.am_a || ''}"> - 
-                    <input type="time" id="am_c_${gIdx}" value="${info.am_c || ''}">
-                </td>
-                <td>
-                    <input type="time" id="pm_a_${gIdx}" value="${info.pm_a || ''}"> - 
-                    <input type="time" id="pm_c_${gIdx}" value="${info.pm_c || ''}">
-                </td>
+                <td><input type="time" id="am_a_${gIdx}" value="${info.am_a || ''}"> - <input type="time" id="am_c_${gIdx}" value="${info.am_c || ''}"></td>
+                <td><input type="time" id="pm_a_${gIdx}" value="${info.pm_a || ''}"> - <input type="time" id="pm_c_${gIdx}" value="${info.pm_c || ''}"></td>
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    function costruisciOrariFissi() {
+        const container = document.getElementById('timeSlotsContainer');
+        container.innerHTML = '';
+        for(let h=8; h<20; h++) {
+            const hStr = String(h).padStart(2, '0');
+            container.innerHTML += `<div class="time-slot-label">${hStr}:00</div>`;
+            container.innerHTML += `<div class="time-slot-label">${hStr}:30</div>`;
+        }
+    }
+
+    async function caricaGrigliaOperatori() {
+        costruisciOrariFissi();
+        const columnsContainer = document.getElementById('columnsContainer');
+        columnsContainer.innerHTML = '';
+
+        const dataSelezionata = document.getElementById('pickerData').value;
+        if(!dataSelezionata) return;
+
+        let listaOps = [];
+        if (configGlobale && configGlobale.nomi_operatori) {
+            configGlobale.nomi_operatori.split(',').forEach(o => {
+                if(o.trim()) listaOps.push(o.trim());
+            });
+        }
+        listaOps.push("Non Assegnato");
+
+        const res = await fetch('/api/admin/tutti-appuntamenti');
+        appuntamentiTutti = await res.json();
+
+        const eventiGiorno = appuntamentiTutti.filter(app => {
+            const parti = app.inizio.split(' ');
+            const dataParti = parti[0].split('/');
+            return `${dataParti[2]}-${dataParti[1]}-${dataParti[0]}` === dataSelezionata;
+        });
+
+        listaOps.forEach(opName => {
+            const colDiv = document.createElement('div');
+            colDiv.className = 'op-column';
+
+            const isUnassigned = opName === "Non Assegnato";
+            const headerClass = isUnassigned ? 'op-header unassigned' : 'op-header';
+            const titleText = isUnassigned ? '⚠️ DA ASSEGNARE' : `👤 ${opName.toUpperCase()}`;
+
+            let slotsBgHtml = '';
+            for(let i=0; i<24; i++) slotsBgHtml += '<div class="op-slot-bg"></div>';
+
+            colDiv.innerHTML = `<div class="${headerClass}">${titleText}</div><div class="op-body">${slotsBgHtml}</div>`;
+
+            const opBody = colDiv.querySelector('.op-body');
+
+            // Filtra appuntamenti di questa specifica colonna
+            const appColonna = eventiGiorno.filter(a => (a.operatore || "Non Assegnato") === opName);
+
+            // Algoritmo di Calcolo per Affiancare le Schede Sovrapposte nello stesso slot
+            const items = appColonna.map(app => {
+                const oraStr = app.inizio.split(' ')[1];
+                const [hh, mm] = oraStr.split(':').map(Number);
+                const startMin = (hh - 8) * 60 + mm;
+                const endMin = startMin + app.durata_minuti;
+
+                return {
+                    app: app,
+                    startMin: startMin,
+                    endMin: endMin,
+                    oraStr: oraStr
+                };
+            });
+
+            // Calcolo sotto-colonne
+            items.forEach((item, i) => {
+                let colIndex = 0;
+                let totalCols = 1;
+
+                items.forEach((other, j) => {
+                    if (i !== j) {
+                        // Verifica sovrapposizione temporale
+                        if (item.startMin < other.endMin && item.endMin > other.startMin) {
+                            totalCols++;
+                            if (j < i) colIndex++;
+                        }
+                    }
+                });
+
+                item.colIndex = colIndex;
+                item.totalCols = totalCols;
+            });
+
+            // Rendering delle tessere senza sovrapposizione
+            items.forEach(item => {
+                const app = item.app;
+                const topPx = (item.startMin / 30) * 40;
+                const heightPx = (app.durata_minuti / 30) * 40 - 4;
+
+                const widthPct = 100 / item.totalCols;
+                const leftPct = item.colIndex * widthPct;
+
+                let colorClass = 'app-giallo';
+                if(app.stato === 'confermato') colorClass = 'app-verde';
+                if(app.stato === 'spostato') colorClass = 'app-blu';
+
+                const card = document.createElement('div');
+                card.className = `appointment-card ${colorClass}`;
+                card.style.top = `${topPx}px`;
+                card.style.height = `${Math.max(heightPx, 36)}px`;
+                card.style.left = `calc(${leftPct}% + 2px)`;
+                card.style.width = `calc(${widthPct}% - 4px)`;
+
+                card.innerHTML = `<div>${app.cliente_nome}</div><div style="font-weight:normal; font-size:10px;">${app.servizio} (${item.oraStr})</div>`;
+
+                card.onclick = () => cliccaEvento(app.id);
+                opBody.appendChild(card);
+            });
+
+            columnsContainer.appendChild(colDiv);
+        });
+    }
+
+    async function inizializzaFullCalendarSettimanale() {
+        const calendarEl = document.getElementById('calendarWeekly');
+        calendarEl.innerHTML = '';
+
+        const mappaColori = {};
+        if (configGlobale && configGlobale.nomi_operatori) {
+            configGlobale.nomi_operatori.split(',').forEach((op, idx) => {
+                const oClean = op.trim();
+                if (oClean) mappaColori[oClean] = tavolozzaColori[idx % tavolozzaColori.length];
+            });
+        }
+
+        const res = await fetch('/api/admin/tutti-appuntamenti');
+        appuntamentiTutti = await res.json();
+
+        const eventi = appuntamentiTutti.map(app => {
+            const parti = app.inizio.split(' ');
+            const dataParti = parti[0].split('/');
+            const dataIso = `${dataParti[2]}-${dataParti[1]}-${dataParti[0]}T${parti[1]}:00`;
+
+            const op = app.operatore || "Non Assegnato";
+            const colore = mappaColori[op] || "#e03131";
+
+            return {
+                id: app.id,
+                title: `[${op.toUpperCase()}] ${app.cliente_nome} - ${app.servizio}`,
+                start: dataIso,
+                backgroundColor: colore,
+                extendedProps: app
+            };
+        });
+
+        const chiusi = [];
+        if (configGlobale && configGlobale.orari_settimana) {
+            Object.keys(configGlobale.orari_settimana).forEach(gIdx => {
+                if(!configGlobale.orari_settimana[gIdx].aperto) chiusi.push(parseInt(gIdx));
+            });
+        }
+
+        fullCalendarInstance = new FullCalendar.Calendar(calendarEl, {
+            locale: 'it',
+            initialView: 'timeGridWeek',
+            editable: true,
+            slotDuration: '00:15:00',
+            hiddenDays: chiusi,
+            slotMinTime: "07:00:00",
+            slotMaxTime: "20:30:00",
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' },
+            allDaySlot: false,
+            events: eventi,
+            eventClick: function(info) { cliccaEvento(info.event.extendedProps.id); },
+            eventDrop: async function(info) {
+                // Formatta la data mantenendo l'orario locale preciso scelto via drag and drop
+                const nuovoInizioIso = formattaDataLocaleIso(info.event.start);
+                try {
+                    const res = await fetch(`/api/admin/sposta/${info.event.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nuovo_inizio: nuovoInizioIso })
+                    });
+                    if (!res.ok) info.revert();
+                } catch (e) { info.revert(); }
+            }
+        });
+
+        fullCalendarInstance.render();
+    }
+
+    function cambiaVistaAgenda(modo) {
+        vistaAttuale = modo;
+        const vDaily = document.getElementById('viewDailyContainer');
+        const vWeekly = document.getElementById('calendarWeekly');
+        const btnD = document.getElementById('btnViewDaily');
+        const btnW = document.getElementById('btnViewWeekly');
+        const boxDate = document.getElementById('boxDatePicker');
+
+        if(modo === 'giorno') {
+            vDaily.classList.remove('hidden');
+            vWeekly.classList.add('hidden');
+            btnD.classList.add('active');
+            btnW.classList.remove('active');
+            boxDate.style.display = 'flex';
+            caricaGrigliaOperatori();
+        } else {
+            vDaily.classList.add('hidden');
+            vWeekly.classList.remove('hidden');
+            btnW.classList.add('active');
+            btnD.classList.remove('active');
+            boxDate.style.display = 'none';
+            inizializzaFullCalendarSettimanale();
+        }
+    }
+
+    function cliccaEvento(idApp) {
+        appuntamentoCorrente = appuntamentiTutti.find(a => a.id === idApp);
+        if(!appuntamentoCorrente) return;
+
+        const txt = `<strong>Cliente:</strong> ${appuntamentoCorrente.cliente_nome}<br>` +
+                    `<strong>Tel:</strong> ${appuntamentoCorrente.cliente_telefono}<br>` +
+                    `<strong>PIN:</strong> <span style="color:#d63384; font-weight:bold;">${appuntamentoCorrente.cliente_pin || '0000'}</span><br>` +
+                    `<strong>Operatore:</strong> <span style="color:#7048e8; font-weight:bold;">${appuntamentoCorrente.operatore || 'Non Assegnato'}</span><br>` +
+                    `<strong>Servizio:</strong> ${appuntamentoCorrente.servizio}<br>` +
+                    `<strong>Data/Ora:</strong> ${appuntamentoCorrente.inizio}<br>` +
+                    `<strong>Stato:</strong> ${appuntamentoCorrente.stato.toUpperCase()}`;
+
+        document.getElementById('modalInfoText').innerHTML = txt;
+        document.getElementById('selectOperatoreInput').value = appuntamentoCorrente.operatore || "Non Assegnato";
+        document.getElementById('modalAzione').classList.remove('hidden');
+        document.getElementById('boxSpostaForm').classList.add('hidden');
+        document.getElementById('boxOperatoreForm').classList.add('hidden');
+    }
+
+    function oggiAgenda() {
+        document.getElementById('pickerData').valueAsDate = new Date();
+        caricaGrigliaOperatori();
     }
 
     function apriModalImpostazioni() { document.getElementById('modalImpostazioni').classList.remove('hidden'); }
@@ -208,96 +569,100 @@
 
     async function salvaImpostazioniSalone() {
         const orariSettimana = {};
-
         ordineGiorni.forEach(gIdx => {
-            const chk = document.getElementById(`chk_${gIdx}`);
-            const am_a = document.getElementById(`am_a_${gIdx}`);
-            const am_c = document.getElementById(`am_c_${gIdx}`);
-            const pm_a = document.getElementById(`pm_a_${gIdx}`);
-            const pm_c = document.getElementById(`pm_c_${gIdx}`);
-
             orariSettimana[gIdx] = {
-                aperto: chk ? chk.checked : false,
-                am_a: am_a ? am_a.value : '',
-                am_c: am_c ? am_c.value : '',
-                pm_a: pm_a ? pm_a.value : '',
-                pm_c: pm_c ? pm_c.value : ''
+                aperto: document.getElementById(`chk_${gIdx}`).checked,
+                am_a: document.getElementById(`am_a_${gIdx}`).value,
+                am_c: document.getElementById(`am_c_${gIdx}`).value,
+                pm_a: document.getElementById(`pm_a_${gIdx}`).value,
+                pm_c: document.getElementById(`pm_c_${gIdx}`).value
             };
         });
 
         const payload = {
-            num_operatrici: parseInt(document.getElementById('cfgOperatrici').value) || 2,
+            nomi_operatori: document.getElementById('cfgOperatori').value.trim(),
             logo_url: document.getElementById('cfgLogoUrl').value.trim(),
             orari_settimana: orariSettimana
         };
 
+        const res = await fetch('/api/admin/config', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
+        if(res.ok) { alert("Impostazioni salvate!"); location.reload(); }
+        else { alert("Errore durante il salvataggio."); }
+    }
+
+    function apriModalNuovaPrenotazione() {
+        document.getElementById('nuovaData').value = document.getElementById('pickerData').value;
+        document.getElementById('modalNuovaPrenotazione').classList.remove('hidden');
+    }
+    function chiudiModalNuovaPrenotazione() { document.getElementById('modalNuovaPrenotazione').classList.add('hidden'); }
+
+    async function salvaNuovaPrenotazioneManuale() {
+        const nome = document.getElementById('nuovoNome').value.trim();
+        const telefono = document.getElementById('nuovoTelefono').value.trim();
+        const servizioId = document.getElementById('nuovoServizio').value;
+        const operatore = document.getElementById('nuovoOperatore').value;
+        const dataGiorno = document.getElementById('nuovaData').value;
+        const oraSlot = document.getElementById('nuovaOra').value;
+
+        if(!nome || !telefono || !servizioId || !dataGiorno || !oraSlot) return alert("Compila tutti i campi!");
+
+        const dtIso = `${dataGiorno}T${oraSlot}:00`;
+
         try {
-            const res = await fetch('/api/admin/config', {
+            const res = await fetch('/api/prenota', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ nome_cliente: nome, telefono_cliente: telefono, pin: "0000", servizio_id: parseInt(servizioId), data_ora_richiesta: dtIso })
             });
 
+            const datiRes = await res.json();
+
             if(res.ok) {
-                alert("Impostazioni salvate con successo!");
-                location.reload();
+                if (datiRes.id) {
+                    await fetch(`/api/admin/conferma/${datiRes.id}`, { method: 'POST' });
+                    if(operatore !== "Non Assegnato") {
+                        await fetch(`/api/admin/assegna-operatore/${datiRes.id}`, {
+                            method: 'PUT',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ operatore: operatore })
+                        });
+                    }
+                }
+                alert("Appuntamento inserito!");
+                chiudiModalNuovaPrenotazione();
+                if(vistaAttuale === 'giorno') caricaGrigliaOperatori();
+                else inizializzaFullCalendarSettimanale();
             } else {
-                const err = await res.json();
-                alert("Errore salvataggio: " + (err.detail || "Parametri non validi"));
+                alert(datiRes.detail || "Errore durante l'inserimento.");
             }
-        } catch (e) {
-            alert("Errore di connessione al server.");
-        }
-    }
-
-    function pulisciNumeroTelefono(tel) {
-        let pulito = tel.replace(/\D/g, '');
-        if (!pulito.startsWith('39') && pulito.length === 10) pulito = '39' + pulito;
-        return pulito;
-    }
-
-    function apriWhatsApp(telefono, testoMessaggio) {
-        const numClean = pulisciNumeroTelefono(telefono);
-        window.open(`https://wa.me/${numClean}?text=${encodeURIComponent(testoMessaggio)}`, '_blank');
-    }
-
-    function generaOrariSposta() {
-        const selectOra = document.getElementById('spostaOraSlot');
-        selectOra.innerHTML = '<option value="">-- Seleziona Ora --</option>';
-
-        for (let h = 8; h < 20; h++) {
-            for (let m = 0; m < 60; m += 15) {
-                const hh = h.toString().padStart(2, '0');
-                const mm = m.toString().padStart(2, '0');
-                const option = document.createElement('option');
-                option.value = `${hh}:${mm}`; option.textContent = `${hh}:${mm}`;
-                selectOra.appendChild(option);
-            }
-        }
+        } catch(e) { alert("Errore di rete."); }
     }
 
     function chiudiModalAzione() {
         document.getElementById('modalAzione').classList.add('hidden');
         document.getElementById('boxSpostaForm').classList.add('hidden');
-        document.getElementById('boxOperatriceForm').classList.add('hidden');
+        document.getElementById('boxOperatoreForm').classList.add('hidden');
     }
 
     function mostraFormSposta() { document.getElementById('boxSpostaForm').classList.remove('hidden'); }
-    function mostraFormOperatrice() { document.getElementById('boxOperatriceForm').classList.remove('hidden'); }
+    function mostraFormOperatore() { document.getElementById('boxOperatoreForm').classList.remove('hidden'); }
 
-    async function salvaSoloOperatrice() {
-        const op = document.getElementById('nomeOperatriceInput').value.trim();
-        if(!op) { alert("Inserisci il nome dell'operatrice!"); return; }
-
-        const res = await fetch(`/api/admin/assegna-operatrice/${appuntamentoCorrente.id}`, {
+    async function salvaSoloOperatore() {
+        const op = document.getElementById('selectOperatoreInput').value;
+        const res = await fetch(`/api/admin/assegna-operatore/${appuntamentoCorrente.id}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ operatrice: op })
+            body: JSON.stringify({ operatore: op })
         });
-
         if(res.ok) {
-            alert("Operatrice assegnata!");
-            location.reload();
+            chiudiModalAzione();
+            if(vistaAttuale === 'giorno') caricaGrigliaOperatori();
+            else inizializzaFullCalendarSettimanale();
         }
     }
 
@@ -305,187 +670,77 @@
         if (!appuntamentoCorrente) return;
         const res = await fetch(`/api/admin/conferma/${appuntamentoCorrente.id}`, { method: 'POST' });
         if (res.ok) {
-            eventoCalendarCorrente.setProp('backgroundColor', '#2b8a3e');
             chiudiModalAzione();
-
-            const msg = `Ciao ${appuntamentoCorrente.cliente}!\n` +
-                        `Il tuo appuntamento per ${appuntamentoCorrente.servizio} il ${appuntamentoCorrente.data_ora_formattata} e' stato CONFERMATO.\n\n` +
-                        `Puoi controllare le tue prenotazioni qui:\n${LINK_APP}`;
-            
-            apriWhatsApp(appuntamentoCorrente.telefono, msg);
+            const msg = `Ciao ${appuntamentoCorrente.cliente_nome}!\nIl tuo appuntamento per ${appuntamentoCorrente.servizio} il ${appuntamentoCorrente.inizio} e' stato CONFERMATO.\n\nControlla qui:\n${LINK_APP}`;
+            window.open(`https://wa.me/39${appuntamentoCorrente.cliente_telefono.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+            if(vistaAttuale === 'giorno') caricaGrigliaOperatori();
+            else inizializzaFullCalendarSettimanale();
         }
     }
 
     async function confermaSpostamentoManuale() {
-        if (!appuntamentoCorrente) return;
         const giorno = document.getElementById('spostaDataGiorno').value;
         const ora = document.getElementById('spostaOraSlot').value;
-
-        if (!giorno || !ora) { alert("Seleziona giorno e orario!"); return; }
+        if (!giorno || !ora) return alert("Seleziona giorno e ora!");
 
         const nuovoInizioIso = `${giorno}T${ora}:00`;
+        const res = await fetch(`/api/admin/sposta/${appuntamentoCorrente.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nuovo_inizio: nuovoInizioIso })
+        });
 
-        try {
-            const res = await fetch(`/api/admin/sposta/${appuntamentoCorrente.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nuovo_inizio: nuovoInizioIso })
-            });
-
-            if (res.ok) {
-                eventoCalendarCorrente.setProp('backgroundColor', '#1971c2');
-                chiudiModalAzione();
-
-                const partiGiorno = giorno.split('-');
-                const dataLeggibile = `${partiGiorno[2]}/${partiGiorno[1]}/${partiGiorno[0]} alle ${ora}`;
-
-                const msg = `Ciao ${appuntamentoCorrente.cliente}!\n` +
-                            `Abbiamo proposto un nuovo orario per il tuo trattamento ${appuntamentoCorrente.servizio}:\n` +
-                            `Data e Ora: ${dataLeggibile}\n\n` +
-                            `Per confermare accedi all'app:\n${LINK_APP}`;
-                
-                apriWhatsApp(appuntamentoCorrente.telefono, msg);
-                location.reload();
-            } else {
-                alert("Orario non disponibile!");
-            }
-        } catch (e) { alert("Errore durante lo spostamento."); }
+        if (res.ok) {
+            chiudiModalAzione();
+            if(vistaAttuale === 'giorno') caricaGrigliaOperatori();
+            else inizializzaFullCalendarSettimanale();
+            const msg = `Ciao ${appuntamentoCorrente.cliente_nome}!\nAbbiamo proposto un nuovo orario per ${appuntamentoCorrente.servizio}: ${giorno} alle ${ora}.\n\nControlla qui:\n${LINK_APP}`;
+            window.open(`https://wa.me/39${appuntamentoCorrente.cliente_telefono.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+        } else { alert("Slot occupato!"); }
     }
 
     async function resettaPinCliente() {
-        if (!appuntamentoCorrente) return;
-        const nuovoPin = prompt(`Inserisci il nuovo PIN a 4 cifre per ${appuntamentoCorrente.cliente}:`, "0000");
+        const nuovoPin = prompt(`Nuovo PIN per ${appuntamentoCorrente.cliente_nome}:`, "0000");
         if (!nuovoPin) return;
-
         const res = await fetch('/api/admin/reset-pin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ telefono: appuntamentoCorrente.telefono, nuovo_pin: nuovoPin })
+            body: JSON.stringify({ telefono: appuntamentoCorrente.cliente_telefono, nuovo_pin: nuovoPin })
         });
         if (res.ok) { alert(`PIN resettato a: ${nuovoPin}`); chiudiModalAzione(); }
     }
 
     async function cancellaDaModal() {
-        if (!appuntamentoCorrente) return;
-        if (confirm("Sicuro di voler cancellare questo appuntamento?")) {
+        if (confirm("Cancellare questo appuntamento?")) {
             const res = await fetch(`/api/admin/cancella/${appuntamentoCorrente.id}`, { method: 'DELETE' });
             if (res.ok) {
-                eventoCalendarCorrente.remove();
                 chiudiModalAzione();
-                const msg = `Ciao ${appuntamentoCorrente.cliente}. Il tuo appuntamento del ${appuntamentoCorrente.data_ora_formattata} e' stato cancellato.\n\n` +
-                            `Per prenotare di nuovo entra qui:\n${LINK_APP}`;
-                apriWhatsApp(appuntamentoCorrente.telefono, msg);
+                if(vistaAttuale === 'giorno') caricaGrigliaOperatori();
+                else inizializzaFullCalendarSettimanale();
+            }
+        }
+    }
+
+    function generaOrariSpostaEInserimento() {
+        const selectSposta = document.getElementById('spostaOraSlot');
+        const selectNuovo = document.getElementById('nuovaOra');
+        selectSposta.innerHTML = '<option value="">-- Ora --</option>';
+        selectNuovo.innerHTML = '<option value="">-- Ora --</option>';
+
+        for (let h = 8; h < 20; h++) {
+            for (let m = 0; m < 60; m += 15) {
+                const hh = String(h).padStart(2, '0');
+                const mm = String(m).padStart(2, '0');
+                selectSposta.appendChild(new Option(`${hh}:${mm}`, `${hh}:${mm}`));
+                selectNuovo.appendChild(new Option(`${hh}:${mm}`, `${hh}:${mm}`));
             }
         }
     }
 
     document.addEventListener('DOMContentLoaded', async function() {
-        const conf = await caricaImpostazioni();
-        generaOrariSposta();
-        
-        const calendarEl = document.getElementById('calendar');
-
-        async function fetchEventi() {
-            const response = await fetch('/api/admin/tutti-appuntamenti');
-            const dati = await response.json();
-
-            return dati.map(app => {
-                const parti = app.inizio.split(' ');
-                const dataParti = parti[0].split('/');
-                const dataIso = `${dataParti[2]}-${dataParti[1]}-${dataParti[0]}T${parti[1]}:00`;
-
-                let colore = '#f59f00';
-                if (app.stato === 'confermato') colore = '#2b8a3e';
-                if (app.stato === 'spostato') colore = '#1971c2';
-
-                return {
-                    id: app.id,
-                    title: `${app.cliente_nome} (${app.operatrice}) - ${app.servizio}`,
-                    start: dataIso,
-                    backgroundColor: colore,
-                    extendedProps: {
-                        id: app.id,
-                        telefono: app.cliente_telefono,
-                        pin: app.cliente_pin,
-                        durata: app.durata_minuti,
-                        servizio: app.servizio,
-                        cliente: app.cliente_nome,
-                        stato: app.stato,
-                        operatrice: app.operatrice,
-                        data_ora_formattata: app.inizio
-                    }
-                };
-            });
-        }
-
-        const eventi = await fetchEventi();
-
-        const chiusi = [];
-        if (conf && conf.orari_settimana) {
-            Object.keys(conf.orari_settimana).forEach(gIdx => {
-                if(!conf.orari_settimana[gIdx].aperto) {
-                    chiusi.push(parseInt(gIdx));
-                }
-            });
-        }
-
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            locale: 'it',
-            initialView: 'timeGridWeek',
-            editable: true,
-            slotDuration: '00:15:00',
-            hiddenDays: chiusi,
-            slotMinTime: "07:00:00",
-            slotMaxTime: "21:00:00",
-            headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
-            allDaySlot: false,
-            events: eventi,
-
-            eventClick: function(info) {
-                appuntamentoCorrente = info.event.extendedProps;
-                eventoCalendarCorrente = info.event;
-
-                const txt = `<strong>Cliente:</strong> ${appuntamentoCorrente.cliente}<br>` +
-                            `<strong>Tel:</strong> ${appuntamentoCorrente.telefono}<br>` +
-                            `<strong>PIN:</strong> <span style="color:#d63384; font-weight:bold;">${appuntamentoCorrente.pin || 'N.D.'}</span><br>` +
-                            `<strong>Operatrice:</strong> <span style="color:#7048e8; font-weight:bold;">${appuntamentoCorrente.operatrice}</span><br>` +
-                            `<strong>Servizio:</strong> ${appuntamentoCorrente.servizio}<br>` +
-                            `<strong>Data/Ora:</strong> ${appuntamentoCorrente.data_ora_formattata}<br>` +
-                            `<strong>Stato:</strong> ${appuntamentoCorrente.stato.toUpperCase()}`;
-
-                document.getElementById('modalInfoText').innerHTML = txt;
-                document.getElementById('nomeOperatriceInput').value = appuntamentoCorrente.operatrice !== "Non Assegnata" ? appuntamentoCorrente.operatrice : "";
-                document.getElementById('modalAzione').classList.remove('hidden');
-                document.getElementById('boxSpostaForm').classList.add('hidden');
-                document.getElementById('boxOperatriceForm').classList.add('hidden');
-            },
-
-            eventDrop: async function(info) {
-                const nuovoInizioIso = info.event.start.toISOString().slice(0, 19);
-
-                try {
-                    const res = await fetch(`/api/admin/sposta/${info.event.id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ nuovo_inizio: nuovoInizioIso })
-                    });
-
-                    if (res.ok) {
-                        info.event.setProp('backgroundColor', '#1971c2');
-                        const props = info.event.extendedProps;
-                        const msg = `Ciao ${props.cliente}!\n` +
-                                    `Abbiamo spostato il tuo appuntamento per ${props.servizio}.\n\n` +
-                                    `Controlla il nuovo orario sull'app:\n${LINK_APP}`;
-                        apriWhatsApp(props.telefono, msg);
-                    } else {
-                        alert("Slot occupato!");
-                        info.revert();
-                    }
-                } catch (e) { info.revert(); }
-            }
-        });
-
-        calendar.render();
+        generaOrariSpostaEInserimento();
+        await caricaImpostazioni();
+        await caricaGrigliaOperatori();
     });
 </script>
 

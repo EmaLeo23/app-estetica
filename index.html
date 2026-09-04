@@ -60,7 +60,6 @@
         <button id="btnTabMiei" class="tab-btn" onclick="mostraTab('miei')">I Miei Appuntamenti</button>
     </div>
 
-    <!-- PRENOTAZIONE -->
     <div id="sezionePrenota">
         <div class="form-group">
             <label for="nome">Nome e Cognome</label>
@@ -98,7 +97,6 @@
         <div id="esitoPrenotazione" class="esito"></div>
     </div>
 
-    <!-- MIEI APPUNTAMENTI -->
     <div id="sezioneMiei" class="hidden">
         <div class="form-group">
             <label for="telefonoRicerca">Numero di Telefono</label>
@@ -155,7 +153,7 @@
         if(!inputData || !configGlobale) return;
 
         const dataObj = new Date(inputData);
-        const gIdx = str = dataObj.getDay().toString(); // 0=Domenica, 1=Lunedì...
+        const gIdx = dataObj.getDay().toString();
 
         const infoGiorno = configGlobale.orari_settimana[gIdx];
 
@@ -308,7 +306,7 @@
 
                 li.innerHTML = `<strong>${app.servizio}</strong><br>
                                 Data e Ora: ${app.data_ora} (${app.durata_minuti} min)<br>
-                                Operatrice: <b>${app.operatrice}</b><br>
+                                Operatore: <b>${app.operatore}</b><br>
                                 ${badgeHtml}
                                 ${azionSpostatoHtml}`;
                 lista.appendChild(li);
