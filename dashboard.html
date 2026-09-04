@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Calendario - Centro Estetico</title>
+    
+    <!-- Libreria FullCalendar per il Calendario Grafico -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales/it.global.min.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f8f9fa; margin: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #d63384; margin-top: 0; }
+        #calendar { margin-top: 20px; }
+        /* Personalizzazione stile FullCalendar */
+        .fc-toolbar-title { color: #d63384; font-size: 1.5em !important; }
+        .fc-button-primary { background-color: #d63384 !important; border-color: #d63384 !important; }
+        .fc-button-primary:hover { background-color: #b8256f !important; border-color: #b8256f !important; }
+        .fc-event { cursor: pointer; border-radius: 4px; padding: 2px 4px; border: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Agenda Salone - Vista Calendario</h1>
+    <div id="calendar"></div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        const calendarEl = document.getElementById('calendar');
+
+        // 1. Recupera gli appuntamenti dal Backend Python
+        async function fetchEventi() {
+            try {
+                const response = await fetch('/api/admin/tutti-appuntamenti');
+                const dati = await response.json();
+
+                // Trasforma i dati per FullCalendar
+                return dati.map(app => {
+                    // Converti il formato data "DD/MM/YYYY HH:MM" in formato ISO standard "YYYY-MM-DDTHH:MM"
+                    const parti = app.inizio.split(' ');
+                    const dataParti = parti[0].split('/');
+                    const dataIso = `${dataParti[2]}-${dataParti[1]}-${dataParti[0]}T${parti[1]}:00`;
+
+                    return {
+                        id: app.id,
+                        title: `${app.cliente_nome} - ${app.servizio}`,
+                        start: dataIso,
+                        extendedProps: {
+                            telefono: app.cliente_telefono,
+                            durata: app.durata_minuti,
+                            servizio: app.servizio,
+                            cliente: app.cliente_nome
+                        },
+                        backgroundColor: '#d63384' // Colore rosa per i blocchi appuntamento
+                    };
+                });
+            } catch (e) {
+                alert("Errore durante il caricamento degli appuntamenti nel calendario.");
+                return [];
+            }
+        }
+
+        const eventi = await fetchEventi();
+
+        // 2. Configura e mostra il Calendario Grafico
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            locale: 'it', // Lingua italiana
+            initialView: 'timeGridWeek', // Vista predefinita: Settimanale con orari
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay' // Tasti Mese, Settimana, Giorno
+            },
+            slotMinTime: '08:00:00', // Ora inizio giornata salone
+            slotMaxTime: '20:00:00', // Ora fine giornata salone
+            allDaySlot: false,
+            events: eventi,
+
+            // Quando si clicca su un appuntamento nel calendario
+            eventClick: async function(info) {
+                const props = info.event.extendedProps;
+                const conferma = confirm(
+                    `Dettagli Appuntamento:\n` +
+                    `--------------------\n` +
+                    `Cliente: ${props.cliente}\n` +
+                    `Telefono: ${props.telefono}\n` +
+                    `Servizio: ${props.servizio}\n` +
+                    `Durata: ${props.durata} min\n\n` +
+                    `Vuoi cancellare questo appuntamento?`
+                );
+
+                if (conferma) {
+                    const response = await fetch(`/api/admin/cancella/${info.event.id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        info.event.remove(); // Rimuove l'evento dal grafico subito
+                        alert("Appuntamento cancellato con successo!");
+                    } else {
+                        alert("Errore nella cancellazione dell'appuntamento.");
+                    }
+                }
+            }
+        });
+
+        calendar.render();
+    });
+</script>
+
+</body>
+</html>

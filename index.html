@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prenotazione Centro Estetico</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 20px; text-align: center; }
+        .card { background: white; max-width: 450px; margin: 20px auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: left; }
+        h2 { color: #d63384; text-align: center; margin-top: 10px; margin-bottom: 20px; }
+        label { font-weight: bold; display: block; margin-top: 10px; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
+        button { background-color: #d63384; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 15px; font-weight: bold; }
+        button:hover { background-color: #b8256f; }
+        ul { list-style-type: none; padding: 0; margin-top: 15px; }
+        li { background: #ffe6f2; margin: 10px 0; padding: 12px; border-radius: 6px; }
+        .esito { margin-top: 10px; font-weight: bold; text-align: center; }
+        .logo-container { text-align: center; margin-top: 10px; }
+        .logo-img { max-width: 150px; height: auto; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- SCHEDA PRENOTAZIONE CLIENTE -->
+<div class="card">
+    
+    <!-- LOGO DEL SALONE -->
+    <div class="logo-container">
+        <img class="logo-img" src="https://scontent-fco2-1.xx.fbcdn.net/v/t39.30808-6/480468931_1189319156532944_8943714481012053854_n.jpg?stp=dst-jpg_tt6&cstp=mx1003x650&ctp=s1003x650&_nc_cat=111&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=Fs2-WrR3-dkQ7kNvwEHzcjC&_nc_oc=AdqdyOXfzHmLML8Ur_2BKaJ2MXnaniHnElnNPmnYIPvMflL7NKfefU_6iWlSFbqVPYo&_nc_zt=23&_nc_ht=scontent-fco2-1.xx&_nc_gid=TVdK4anBsl2p24uHROhXOg&_nc_ss=7b289&oh=00_AQI-8iwrNJSMIV_v-oFRdCRfyHTayEJuBV_4VkrDndz2uw&oe=6AA0784C" alt="Logo Salone">
+    </div>
+
+    <h2>Prenota un Trattamento</h2>
+    
+    <label for="nome">Nome e Cognome:</label>
+    <input type="text" id="nome" placeholder="es. Maria Rossi">
+
+    <label for="telefono">Numero di Telefono:</label>
+    <input type="text" id="telefono" placeholder="es. +393331234567">
+
+    <label for="servizio">Scegli il Trattamento:</label>
+    <select id="servizio">
+        <option value="">Caricamento trattamenti...</option>
+    </select>
+
+    <label for="dataOra">Data e Ora desiderata:</label>
+    <input type="datetime-local" id="dataOra">
+
+    <button onclick="effettuaPrenotazione()">Prenota Ora</button>
+    <div id="esitoPrenotazione" class="esito"></div>
+</div>
+
+<!-- SCHEDA CONSULTAZIONE APPUNTAMENTI -->
+<div class="card">
+    <h2>I Miei Appuntamenti</h2>
+    <label for="telefonoRicerca">Inserisci il tuo numero di telefono:</label>
+    <input type="text" id="telefonoRicerca" placeholder="es. +393331234567">
+    <button onclick="cercaAppuntamenti()">Cerca Miei Appuntamenti</button>
+
+    <ul id="listaAppuntamenti"></ul>
+</div>
+
+<script>
+    async function caricaServizi() {
+        const select = document.getElementById('servizio');
+        try {
+            const response = await fetch('/api/servizi');
+            const servizi = await response.json();
+            select.innerHTML = '<option value="">-- Seleziona un servizio --</option>';
+            servizi.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.nome} (${s.durata} min)`;
+                select.appendChild(opt);
+            });
+        } catch (e) {
+            select.innerHTML = '<option value="">Errore nel caricamento dei servizi</option>';
+        }
+    }
+
+    async function effettuaPrenotazione() {
+        const nome = document.getElementById('nome').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        const servizioId = document.getElementById('servizio').value;
+        const dataOraVal = document.getElementById('dataOra').value;
+        const esitoDiv = document.getElementById('esitoPrenotazione');
+
+        if (!nome || !telefono || !servizioId || !dataOraVal) {
+            alert('Compila tutti i campi!');
+            return;
+        }
+
+        esitoDiv.style.color = 'black';
+        esitoDiv.textContent = 'Verifica disponibilità in corso...';
+
+        try {
+            const response = await fetch('/api/prenota', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nome_cliente: nome,
+                    telefono_cliente: telefono,
+                    servizio_id: parseInt(servizioId),
+                    data_ora_richiesta: dataOraVal + ':00'
+                })
+            });
+
+            const res = await response.json();
+
+            if (response.ok) {
+                esitoDiv.style.color = 'green';
+                esitoDiv.textContent = res.messaggio;
+            } else {
+                esitoDiv.style.color = 'red';
+                esitoDiv.textContent = res.detail || 'Errore nella prenotazione.';
+            }
+        } catch (err) {
+            esitoDiv.style.color = 'red';
+            esitoDiv.textContent = 'Errore di connessione al server.';
+        }
+    }
+
+    async function cercaAppuntamenti() {
+        const telefono = document.getElementById('telefonoRicerca').value.trim();
+        const lista = document.getElementById('listaAppuntamenti');
+        lista.innerHTML = "";
+
+        if (!telefono) {
+            alert("Inserisci un numero di telefono!");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/miei-appuntamenti/${encodeURIComponent(telefono)}`);
+            const dati = await response.json();
+
+            if (dati.length === 0) {
+                lista.innerHTML = "<li>Nessun appuntamento trovato.</li>";
+                return;
+            }
+
+            dati.forEach(app => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${app.servizio}</strong><br>
+                                📅 ${app.data_ora}<br>
+                                ⏱️ Durata: ${app.durata_minuti} minuti`;
+                lista.appendChild(li);
+            });
+        } catch (error) {
+            alert("Errore durante il recupero degli appuntamenti.");
+        }
+    }
+
+    caricaServizi();
+</script>
+
+</body>
+</html>
