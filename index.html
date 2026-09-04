@@ -2,70 +2,182 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Prenotazione Centro Estetico</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 20px; text-align: center; }
-        .card { background: white; max-width: 450px; margin: 20px auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: left; }
-        h2 { color: #d63384; text-align: center; margin-top: 10px; margin-bottom: 20px; }
-        label { font-weight: bold; display: block; margin-top: 10px; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
-        button { background-color: #d63384; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 15px; font-weight: bold; }
-        button:hover { background-color: #b8256f; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f8f9fa; 
+            margin: 0; 
+            padding: 12px;
+            color: #333;
+        }
+        .app-card { 
+            background: white; 
+            max-width: 480px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            border-radius: 18px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08); 
+        }
+        .logo-container { text-align: center; margin-bottom: 15px; }
+        .logo-img { max-width: 120px; height: auto; border-radius: 12px; }
+        
+        /* Tasti di Navigazione Tab per Mobile */
+        .tab-buttons {
+            display: flex;
+            background: #f1f3f5;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            background: white;
+            color: #d63384;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+
+        /* Form ed Elementi Input */
+        .form-group { margin-bottom: 16px; }
+        label { font-weight: 600; display: block; margin-bottom: 6px; font-size: 14px; color: #495057; }
+        input, select { 
+            width: 100%; 
+            padding: 14px; 
+            border: 1.5px solid #dee2e6; 
+            border-radius: 10px; 
+            font-size: 16px; /* Evita lo zoom automatico su iPhone */
+            background-color: #fff;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        input:focus, select:focus {
+            border-color: #d63384;
+            outline: none;
+        }
+        select {
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22293%22%20height%3D%22293%22%3E%3Cpath%20fill%3D%22%236c757d%22%20d%3D%22M201.4%2040.4l-64%2064-64-64L45.4%2068.4l84%2084%2084-84z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 12px;
+        }
+        .btn-submit { 
+            background-color: #d63384; 
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            width: 100%; 
+            font-weight: 700; 
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(214, 51, 132, 0.25);
+        }
+        .btn-submit:active { transform: scale(0.98); }
+
+        /* Lista Appuntamenti */
         ul { list-style-type: none; padding: 0; margin-top: 15px; }
-        li { background: #ffe6f2; margin: 10px 0; padding: 12px; border-radius: 6px; }
-        .esito { margin-top: 10px; font-weight: bold; text-align: center; }
-        .logo-container { text-align: center; margin-top: 10px; }
-        .logo-img { max-width: 150px; height: auto; border-radius: 10px; }
+        li { 
+            background: #fff0f6; 
+            border-left: 4px solid #d63384;
+            margin-bottom: 12px; 
+            padding: 14px; 
+            border-radius: 8px; 
+            font-size: 14px;
+        }
+        .esito { margin-top: 15px; font-weight: 600; text-align: center; font-size: 14px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<!-- SCHEDA PRENOTAZIONE CLIENTE -->
-<div class="card">
-    
-    <!-- LOGO DEL SALONE -->
+<div class="app-card">
+    <!-- LOGO SALONE -->
     <div class="logo-container">
         <img class="logo-img" src="https://scontent-fco2-1.xx.fbcdn.net/v/t39.30808-6/480468931_1189319156532944_8943714481012053854_n.jpg?stp=dst-jpg_tt6&cstp=mx1003x650&ctp=s1003x650&_nc_cat=111&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=Fs2-WrR3-dkQ7kNvwEHzcjC&_nc_oc=AdqdyOXfzHmLML8Ur_2BKaJ2MXnaniHnElnNPmnYIPvMflL7NKfefU_6iWlSFbqVPYo&_nc_zt=23&_nc_ht=scontent-fco2-1.xx&_nc_gid=TVdK4anBsl2p24uHROhXOg&_nc_ss=7b289&oh=00_AQI-8iwrNJSMIV_v-oFRdCRfyHTayEJuBV_4VkrDndz2uw&oe=6AA0784C" alt="Logo Salone">
     </div>
 
-    <h2>Prenota un Trattamento</h2>
-    
-    <label for="nome">Nome e Cognome:</label>
-    <input type="text" id="nome" placeholder="es. Maria Rossi">
+    <!-- SELETTORE TAB -->
+    <div class="tab-buttons">
+        <button id="btnTabPrenota" class="tab-btn active" onclick="mostraTab('prenota')">Prenota</button>
+        <button id="btnTabMiei" class="tab-btn" onclick="mostraTab('miei')">I Miei Appuntamenti</button>
+    </div>
 
-    <label for="telefono">Numero di Telefono:</label>
-    <input type="text" id="telefono" placeholder="es. +393331234567">
+    <!-- SEZIONE 1: PRENOTAZIONE -->
+    <div id="sezionePrenota">
+        <div class="form-group">
+            <label for="nome">Nome e Cognome</label>
+            <input type="text" id="nome" placeholder="es. Maria Rossi">
+        </div>
 
-    <label for="servizio">Scegli il Trattamento:</label>
-    <select id="servizio">
-        <option value="">Caricamento trattamenti...</option>
-    </select>
+        <div class="form-group">
+            <label for="telefono">Numero di Telefono</label>
+            <input type="tel" id="telefono" placeholder="es. +393331234567">
+        </div>
 
-    <label for="dataOra">Data e Ora desiderata:</label>
-    <input type="datetime-local" id="dataOra">
+        <div class="form-group">
+            <label for="servizio">Trattamento</label>
+            <select id="servizio">
+                <option value="">Caricamento servizi...</option>
+            </select>
+        </div>
 
-    <button onclick="effettuaPrenotazione()">Prenota Ora</button>
-    <div id="esitoPrenotazione" class="esito"></div>
-</div>
+        <div class="form-group">
+            <label for="dataOra">Data e Ora</label>
+            <input type="datetime-local" id="dataOra">
+        </div>
 
-<!-- SCHEDA CONSULTAZIONE APPUNTAMENTI -->
-<div class="card">
-    <h2>I Miei Appuntamenti</h2>
-    <label for="telefonoRicerca">Inserisci il tuo numero di telefono:</label>
-    <input type="text" id="telefonoRicerca" placeholder="es. +393331234567">
-    <button onclick="cercaAppuntamenti()">Cerca Miei Appuntamenti</button>
+        <button class="btn-submit" onclick="effettuaPrenotazione()">Conferma Prenotazione</button>
+        <div id="esitoPrenotazione" class="esito"></div>
+    </div>
 
-    <ul id="listaAppuntamenti"></ul>
+    <!-- SEZIONE 2: I MIEI APPUNTAMENTI -->
+    <div id="sezioneMiei" class="hidden">
+        <div class="form-group">
+            <label for="telefonoRicerca">Numero di Telefono</label>
+            <input type="tel" id="telefonoRicerca" placeholder="es. +393331234567">
+        </div>
+        <button class="btn-submit" onclick="cercaAppuntamenti()">Cerca Appuntamenti</button>
+
+        <ul id="listaAppuntamenti"></ul>
+    </div>
 </div>
 
 <script>
+    function mostraTab(tab) {
+        document.getElementById('sezionePrenota').classList.add('hidden');
+        document.getElementById('sezioneMiei').classList.add('hidden');
+        document.getElementById('btnTabPrenota').classList.remove('active');
+        document.getElementById('btnTabMiei').classList.remove('active');
+
+        if (tab === 'prenota') {
+            document.getElementById('sezionePrenota').classList.remove('hidden');
+            document.getElementById('btnTabPrenota').classList.add('active');
+        } else {
+            document.getElementById('sezioneMiei').classList.remove('hidden');
+            document.getElementById('btnTabMiei').classList.add('active');
+        }
+    }
+
     async function caricaServizi() {
         const select = document.getElementById('servizio');
         try {
             const response = await fetch('/api/servizi');
             const servizi = await response.json();
-            select.innerHTML = '<option value="">-- Seleziona un servizio --</option>';
+            select.innerHTML = '<option value="">-- Seleziona Trattamento --</option>';
             servizi.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.id;
@@ -73,7 +185,7 @@
                 select.appendChild(opt);
             });
         } catch (e) {
-            select.innerHTML = '<option value="">Errore nel caricamento dei servizi</option>';
+            select.innerHTML = '<option value="">Errore caricamento trattamenti</option>';
         }
     }
 
@@ -85,12 +197,12 @@
         const esitoDiv = document.getElementById('esitoPrenotazione');
 
         if (!nome || !telefono || !servizioId || !dataOraVal) {
-            alert('Compila tutti i campi!');
+            alert('Per favore, compila tutti i campi!');
             return;
         }
 
-        esitoDiv.style.color = 'black';
-        esitoDiv.textContent = 'Verifica disponibilità in corso...';
+        esitoDiv.style.color = '#333';
+        esitoDiv.textContent = 'Verifica disponibilità...';
 
         try {
             const response = await fetch('/api/prenota', {
@@ -107,14 +219,14 @@
             const res = await response.json();
 
             if (response.ok) {
-                esitoDiv.style.color = 'green';
+                esitoDiv.style.color = '#2b8a3e';
                 esitoDiv.textContent = res.messaggio;
             } else {
-                esitoDiv.style.color = 'red';
-                esitoDiv.textContent = res.detail || 'Errore nella prenotazione.';
+                esitoDiv.style.color = '#e03131';
+                esitoDiv.textContent = res.detail || 'Orario non disponibile.';
             }
         } catch (err) {
-            esitoDiv.style.color = 'red';
+            esitoDiv.style.color = '#e03131';
             esitoDiv.textContent = 'Errore di connessione al server.';
         }
     }
@@ -134,7 +246,7 @@
             const dati = await response.json();
 
             if (dati.length === 0) {
-                lista.innerHTML = "<li>Nessun appuntamento trovato.</li>";
+                lista.innerHTML = "<li>Nessun appuntamento trovato per questo numero.</li>";
                 return;
             }
 
@@ -142,11 +254,11 @@
                 const li = document.createElement('li');
                 li.innerHTML = `<strong>${app.servizio}</strong><br>
                                 📅 ${app.data_ora}<br>
-                                ⏱️ Durata: ${app.durata_minuti} minuti`;
+                                ⏱️ Durata: ${app.durata_minuti} min`;
                 lista.appendChild(li);
             });
         } catch (error) {
-            alert("Errore durante il recupero degli appuntamenti.");
+            alert("Errore durante la ricerca.");
         }
     }
 
